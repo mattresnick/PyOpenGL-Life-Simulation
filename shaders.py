@@ -458,10 +458,6 @@ void main()
 
 
 
-
-
-
-
 shader_strings = {'burnv':burnvshader,
                   'burnf':burnfshader,
                   'spawnv':spawnvshader,

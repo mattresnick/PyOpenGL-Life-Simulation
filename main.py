@@ -12,8 +12,8 @@ from copy import copy
 from DrawLight import Light
 from help_funcs import PrintText, printText, importTexture, ErrCheck
 
-from SimpleObjects import WireFrameCyl, Box, drawContainer, drawContainerWalls, Cylinder, OpenCone, Pipe, Pipe3
-from BaseSpecies import Crawler, Mouth, Tail
+from SimpleObjects import drawContainer, drawContainerWalls
+from BaseSpecies import Crawler
 from world_objects import Terrain, Skybox, Lamp, Table
 
 from shaders import shader_strings
@@ -22,7 +22,7 @@ from shader_functions import activateShader
 
 ''' -------- Global Variables -------- '''
 
-from global_vars import glight, Cos, Sin
+from global_vars import glight, Cos, Sin, init_cam_pos, inspect_cam_pos
 light = glight.copy()
 
 lightpos = None
@@ -36,6 +36,7 @@ shaders = {}
 skybox_textures={}
 table_texture= None
 on=True
+scale_size=0.5
 
 
 free_sim_mode = True
@@ -51,19 +52,13 @@ total_count=0
 tvars={'f':0,'g':0,'h':1}
 
 # Camera variable dictionaries.
-cam_p = {'E_x':-8,
-         'E_y':5,
-         'E_z':0,
-         'C_x':0,
-         'C_y':0,
-         'C_z':0,
-         'U_x':0,
-         'U_y':1,
-         'U_z':0}
 
+cam_p = init_cam_pos.copy()
+cam_vars = {'th_h': -25, 'phi_v': -15}
+'''
 cam_vars = {'th_h':0,
             'phi_v':-30}
-
+'''
 
 # Window dimensions (width, height).
 w, h = 1000, 1000
@@ -185,33 +180,12 @@ def display():
         print ('draw',e)
     
     
-    try:
-        
-        
-        _gl.glPushMatrix()
-            
-        
-        #_gl.glRotatef(*[90,1,0,0])
-        #_gl.glRotatef(*[180,0,1,0])
-        #_gl.glTranslatef(*[-7,0,-2])
-        
-        _gl.glTranslatef(*[0,30,0])
-        
-        obs['tail'].draw()
-            
-        _gl.glPopMatrix()
-        
-    except Exception as e:
-        print (e)
-    
     '''
     _gl.glUseProgram(0)
     
     
     # Draw the terrain in the container.
     obs['terrain'].draw(tex=tex,s=[0.5,0.5,0.5],t=[-10,-1,-10])
-    
-    
     
     
     
@@ -233,9 +207,6 @@ def display():
     
     # Draw skybox.
     obs['skybox'].draw()
-    
-    
-    
     
     
     
@@ -267,7 +238,9 @@ def display():
     
     #  Display parameter values at bottom left of window.
     alive = len(list(creatures.keys()))
-    prt_str1, prt_str2 = printText(on=on,n_alive=alive,n_total=total_count,light=light)
+    prt_str1, prt_str2 = printText(on=on,n_alive=alive,n_total=total_count,
+                                   light=light,freeview=free_sim_mode,
+                                   spawnsize=scale_size)
     
     _gl.glWindowPos2i(5,24)
     PrintText(prt_str1+'\n')
@@ -302,6 +275,8 @@ def killAll():
         creatures[name].burn=True
         creatures[name].notburning=False
 
+
+    
 
 
 
@@ -359,12 +334,26 @@ def spawnCreature(location=None, facing_th=None, stasis=None):
     if facing_th is None:
         facing_th = np.random.randint(low=0, high=360)
     
-    creatures[name] = Crawler()
-        
+    success=False
+    tries=0
+    
+    while not success and tries<10:
+        tries+=1
+        try:
+            creatures[name] = Crawler()
+            success = True
+        except Exception as e:
+            print (f'Creature intitialization exception. Attempt #{tries}/10.')
+    
+    if not success:
+        return False
+    
+    creatures[name].sizeUpdate(scale_size)
     creatures[name].center_location = location
     creature_locs[name] = location
     creature_boxes[name] = creatures[name].hitbox
     creatures[name].facing[0] = facing_th
+    
     
     total_count+=1
     
@@ -393,11 +382,11 @@ def camUpdate():
     cam_p['C_y'] = Sin(cam_vars['phi_v'])+cam_p['E_y']
     cam_p['C_z'] = Sin(cam_vars['th_h'])+cam_p['E_z']
     
-    #print (cam_p)
+    
 
 
 def camSpecial(key, x, y):
-    global cam_vars, on, light
+    global cam_vars, on, light, free_sim_mode
     
     # Arrow keys look around.
     if key == _glut.GLUT_KEY_UP and cam_vars['phi_v']<90:
@@ -422,6 +411,27 @@ def camSpecial(key, x, y):
     # F2 toggles light movement.
     elif key == _glut.GLUT_KEY_F2:
         light['m'] = (not light['m'])
+        
+        
+    # F3 spawns in a new crawler.
+    elif key == _glut.GLUT_KEY_F3:
+        
+        if free_sim_mode:
+            try:
+                attempt = spawnCreature()
+                if not attempt:
+                    print ('There may not be enough room for the requested number of creatures.')
+                    print ('Stopping creature generation.')
+            except Exception as e:
+                print ('spawn',e)
+        else:
+            try:
+                if len(list(creatures.keys()))<1:
+                    attempt = spawnCreature(location=[0,0,0],facing_th=0,stasis=True)
+                if not attempt:
+                    print ('Creature creation failed due to memory exception.')
+            except Exception as e:
+                print ('spawn2',e)
     
     
     _glut.glutPostRedisplay()
@@ -429,7 +439,7 @@ def camSpecial(key, x, y):
 
 
 def camKey(ch, x, y):
-    global cam_p, free_sim_mode
+    global cam_p, cam_vars, free_sim_mode, scale_size
     
     if ch==b'\x1b':
         os._exit(1)
@@ -479,36 +489,24 @@ def camKey(ch, x, y):
         light['zh']+=5
     
     
-    # Spawn in a new crawler.
-    elif ch==b'g' or ch==b'G':
-        
-        if free_sim_mode:
-            try:
-                attempt = spawnCreature()
-                if not attempt:
-                    print ('There may not be enough room for the requested number of creatures.')
-                    print ('Stopping creature generation.')
-            except Exception as e:
-                print ('spawn',e)
-        else:
-            try:
-                if len(list(creatures.keys()))<1:
-                    attempt = spawnCreature(location=[0,0,0],facing_th=0,stasis=True)
-            except Exception as e:
-                print ('spawn2',e)
+    
     
     elif ch==b'f' or ch==b'F':
         if free_sim_mode:
             free_sim_mode = False
             light['d'] = 1
             light['m'] = True
-            cam_p = {'E_x': -4.0, 'E_y': 2.2860619515673033, 'E_z': 0.0, 
-                     'C_x': -3.0, 'C_y': 1.7860619515673033, 'C_z': 0.0, 
-                     'U_x': 0, 'U_y': 1, 'U_z': 0}
+            cam_p = inspect_cam_pos.copy()
+            cam_vars = {'th_h':0,'phi_v':-30}
+            camUpdate()
+            killAll()
         else:
             free_sim_mode = True
             killAll()
-            #cam_p = {}
+            cam_p = init_cam_pos.copy()
+            cam_vars = {'th_h': -25, 'phi_v': -15}
+            camUpdate()
+    
     
     
     elif ch==b'j' or ch==b'J':
@@ -518,6 +516,12 @@ def camKey(ch, x, y):
             creatures[name].burn = False
             creatures[name].timevars= {'f':True,'s':0,'el':0}
             creatures[name].spawn = (not creatures[name].spawn)
+        
+        else:
+            if ch==b'j' and scale_size<2:
+                scale_size=round(scale_size + 0.05,2)
+            elif ch==b'J' and scale_size>0.05:
+                scale_size=round(scale_size - 0.05,2)
     
     elif ch==b'k' or ch==b'K':
         crtrs = list(creatures.keys())
@@ -595,7 +599,7 @@ def turnDeg(name, deg):
     
     t = _glut.glutGet(_glut.GLUT_ELAPSED_TIME)/1000
     
-    if t-creatures[name].last_collision>0.1:
+    if t-creatures[name].last_collision>0.5:
     
         if not isinstance(deg,int):
             
@@ -664,7 +668,18 @@ def collisionHandler(n1,n2):
             newdna[female_ind] = creatures[mname].dna[r_ind()]
             
             # Childbirth.
-            creatures[bname] = Crawler(dna=newdna)
+            success=False
+            tries=0
+            while not success and tries<10:
+                tries+=1
+                try:
+                    creatures[bname] = Crawler(dna=newdna)
+                    success = True
+                except Exception as e:
+                    print (f'Creature intitialization exception. Attempt #{tries}/10.')
+            
+            
+            creatures[bname].sizeUpdate(scale_size)
             
             mid = list((np.array(creatures[n2].center_location) +\
                         np.array(creatures[n1].center_location))/2)
@@ -833,19 +848,6 @@ def initObjects():
     global obs,obs_init,total_count, lightpos
     
     
-    try:
-        obs['pipe'] = Pipe([[0,0,0],[0,1,0],[0,2,1]],res=15,r=0.1)
-    except Exception as e:
-        print ('init',e)
-    
-    
-    try:
-        obs['tail'] = Tail()
-    except Exception as e:
-        print ('mouth',e)
-    
-    
-    
     obs_init['terrain']=False
     obs_init['skybox']=False
     obs_init['table']=False
@@ -877,15 +879,12 @@ def initObjects():
             c = str(check)
             print (f'Initialization exception. Attempt #{c}/10.')
     
-    '''
-    for i in range(10):
+    
+    for i in range(5):
         attempt = spawnCreature()
-        
         if not attempt:
-            print ('There may not be enough room for the requested number of creatures.')
-            print ('Stopping creature generation.')
-            break
-    '''
+            print ('Creature creation failed due to memory exception.')
+    
 
 
 def initShaders():

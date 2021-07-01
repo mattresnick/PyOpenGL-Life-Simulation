@@ -15,15 +15,27 @@ def PrintText(text):
 
 
 # Generates text to be displayed in the bottom left of the window.
-def printText(on, n_alive, n_total, light):
-    m = light['m']
+def printText(on, n_alive, n_total, light, freeview, spawnsize):
+    
+    if light['m']: m='on'
+    else: m='off'
+    
     y = light['y']
     d = light['d']
     
     
-    prt_str1=f'Creature movement on: {on}. Light movement on: {m}.'
-    prt_str2=f'Number alive: {n_alive}, Total all-time: {n_total}. | '
-    prt_str2 = prt_str2 + f'Light height: {y}, Light distance {d}.'
+    prt_str1=f'Number alive: {n_alive} | Total all-time: {n_total}. | '
+    
+    if freeview:
+        prt_str1 = prt_str1 + 'View mode: free view.'
+        prt_str2=f'Creature movement on: {on} | Spawn size: {spawnsize}.'
+        
+    else:
+        prt_str1 = prt_str1 + 'View mode: inspect view.'
+        
+        prt_str2 = f'Light height: {y} | Light distance {d} | '
+        prt_str2 = prt_str2 + f'Light movement: {m}.'
+        
     
     return prt_str1, prt_str2
 

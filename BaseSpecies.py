@@ -66,8 +66,10 @@ class Crawler:
         self.DOB = 0.001*_glut.glutGet(_glut.GLUT_ELAPSED_TIME)
         self.center_location = [0,0,0]
         self.facing = [0,0,1,0]
-        self.size = [1,1,1]
-        self.hitbox = 1
+        
+        self.hitbox = 0.5
+        self.size = [self.hitbox for i in range(3)]
+        
         self.last_collision = self.DOB
         
         self.age = 1
@@ -78,11 +80,12 @@ class Crawler:
         self.sex = bool((self.dna[0])%2)
         
         self.body = so.Sphere(res=15)
-        self.headtube = so.Cylinder(res=15)
-        self.antenna = so.Pipe(wire_points=self.antennaWirePoints(), 
+        #self.headtube = so.Cylinder(res=15)
+        self.antenna = so.WireFrameCyl(wire_points=self.antennaWirePoints(), 
                                                 res=30, r=0.1)
-        self.mouth = Mouth(colors=[1,0,0])
-        self.tail = Tail(colors=[i/255 for i in [111,119,85]])
+        self.mouth = Mouth(colors=[1,1,1])
+        self.tail = Tail(colors=[1,1,1])
+        #self.tail = Tail(colors=[i/255 for i in [111,119,85]])
         
         self.numlegs = int(np.sum(self.dna)/2) + 2
         if bool(self.numlegs%2):
@@ -90,6 +93,7 @@ class Crawler:
             
         self.legs = []
         self.initLegs()
+        self.initLoop()
         
         # Movement step size/speeds. Array-like for alternate speeds.
         speed_mult = self.numlegs/4
@@ -127,6 +131,11 @@ class Crawler:
         self.tailrand = [[xrands[i],yrands[i],zrands[i]] for i in range(3)]
         
     
+    
+    
+    def sizeUpdate(self,s):
+        self.hitbox = s
+        self.size = [self.hitbox for i in range(3)]
     
     def getSkinColors(self):
         
@@ -302,7 +311,6 @@ class Crawler:
                 self.spawn=True
                 
             if self.hatched:
-                self.hitbox = 1
                 
                 if self.age>self.lifespan and self.notburning:
                     self.burnUpdate()
@@ -357,7 +365,7 @@ class Crawler:
                 self.drawLoop()
         else:
             self.BurnSpawnShaders(*self.shaderprogs,*self.ADP)
-            self.body.draw(s=[0.2,0.2,0.2])
+            self.body.draw(s=[0.4*self.hitbox for i in range(3)])
     
     
     
@@ -388,6 +396,17 @@ class Crawler:
                           s=[0.3,0.3,0.3])
     
     
+    
+    def initLoop(self):
+        pts = [[0,0.025,0],
+               [0,0.4,0]]
+        
+        for i in range(270,270+360+30,30):
+            pts.append([0,0.1*Sin(i)+0.5,0.1*Cos(i)])
+        
+        self.loop = so.WireFrameCyl(wire_points=pts, 
+                                    res=15, r=.04)
+    
     def initLegs(self):
         
         leg_angles = [[180],
@@ -409,12 +428,12 @@ class Crawler:
             pos6 = [1.8*Cos(lpoint-5),0,1.8*Sin(lpoint-5)]
             
             leg1 = so.WireFrameCyl(wire_points=[pos1,pos2,pos3,pos4], 
-                               res=30, r=.04)
+                               res=30, r=.04, bigjoints=True)
             
             toe1 = so.WireFrameCyl(wire_points=[pos3,pos5], 
-                               res=30, r=.04)
+                               res=30, r=.04, bigjoints=True)
             toe2 = so.WireFrameCyl(wire_points=[pos3,pos6], 
-                               res=30, r=.04)
+                               res=30, r=.04, bigjoints=True)
             
             self.legs.append(leg1)
             self.legs.append(toe1)
@@ -430,12 +449,12 @@ class Crawler:
             pos6 = [1.8*Cos(lpoint+175),0,1.8*Sin(lpoint+175)]
             
             leg2 = so.WireFrameCyl(wire_points=[pos1,pos2,pos3,pos4], 
-                               res=30, r=.04)
+                               res=30, r=.04, bigjoints=True)
             
             toe3 = so.WireFrameCyl(wire_points=[pos3,pos5], 
-                               res=30, r=.04)
+                               res=30, r=.04, bigjoints=True)
             toe4 = so.WireFrameCyl(wire_points=[pos3,pos6], 
-                               res=30, r=.04)
+                               res=30, r=.04, bigjoints=True)
             
             self.legs.append(leg2)
             self.legs.append(toe3)
@@ -487,16 +506,7 @@ class Crawler:
     
     
     def drawLoop(self):
-        pts = [[0,0.025,0],
-               [0,0.4,0]]
-        
-        for i in range(270,270+360+30,30):
-            pts.append([0,0.1*Sin(i)+0.5,0.1*Cos(i)])
-        
-        loop = so.WireFrameCyl(wire_points=pts, 
-                               res=15, r=.04)
-        
-        loop.draw()
+        self.loop.draw()
             
 
 
