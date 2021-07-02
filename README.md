@@ -31,7 +31,7 @@ j/J key: increase/decrease spawn size of crawlers
 k key: kill all living crawlers
 
 In inspect view:
-+ or - : increase or decrease light distance
+\+ or - : increase or decrease light distance
 ] or [ : increase or decrease light height
 \> or < : move light sideways in either direction
 
