@@ -33,7 +33,7 @@ k key: kill all living crawlers
 In inspect view:
 + or - : increase or decrease light distance
 ] or [ : increase or decrease light height
-> or < : move light sideways in either direction
+\> or < : move light sideways in either direction
 
 j key: activate spawn animation
 k key: activate burn animation
