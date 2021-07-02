@@ -1,5 +1,5 @@
 
-### Overview
+## Overview
 
 This is a simple "life" simulation done via PyOpenGL to experiment with and implement 3D models, lighting, textures, and basic shaders.
 
@@ -13,53 +13,53 @@ Things of note to see:
 
 
 
-### Controls
+## Controls
 
-Esc key: quit
+**Esc**: quit
 
-w/a/s/d: camera movement
+**w/a/s/d**: camera movement
 
-arrow keys: camera look movement
-
-
-f key: toggle view mode (free view/crawler inspect view)
+**arrow keys**: camera look movement
 
 
-F1 key: toggle creature movement
-
-F2 key: toggle light auto-movement
+**f**: toggle view mode (free view/crawler inspect view)
 
 
-In free view:
+**F1**: toggle creature movement
 
-F3 key: spawn in a new egg in a random position
-
-j/J key: increase/decrease spawn size of crawlers
-
-k key: kill all living crawlers
+**F2**: toggle light auto-movement
 
 
-In inspect view:
+### In free view:
 
-\+ or - : increase or decrease light distance
+**F3**: spawn in a new egg in a random position
 
-] or [ : increase or decrease light height
+**j/J**: increase/decrease spawn size of crawlers
 
-\> or < : move light sideways in either direction
-
-
-j key: activate spawn animation
-
-k key: activate burn animation
+**k**: kill all living crawlers
 
 
+### In inspect view:
+
+**\+** or **-** : increase or decrease light distance
+
+**]** or **\[** : increase or decrease light height
+
+**\>** or **<** : move light sideways in either direction
+
+
+**j**: activate spawn animation
+
+**k**: activate burn animation
 
 
 
 
 
 
-### Description of Crawler “Life”
+
+
+## Description of Crawler “Life”
 
 The crawlers begin as eggs, spawned randomly about the area within the boundaries. However, if two crawlers would overlap, the random location is resampled until an open space is found. If there's not enough open space after 100 resamples, they will simply stop spawning. Then after a pre-set time until hatching, the crawlers will "hatch" and spawn in as adults. The spawn effect is done via fragment shader. They begin facing a random direction, and their sex and number of legs is determined by a crude "DNA" consisting of two integer values in [0,9]. Females and males are currently identical except that females have a loop structure on top of their heads. They all move standard though, going forward unless encountering a wall or another crawler, when they turn on a preset value. 
 
