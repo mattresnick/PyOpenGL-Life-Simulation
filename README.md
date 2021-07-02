@@ -16,26 +16,40 @@ Things of note to see:
 ### Controls
 
 Esc key: quit
+
 w/a/s/d: camera movement
+
 arrow keys: camera look movement
+
 
 f key: toggle view mode (free view/crawler inspect view)
 
+
 F1 key: toggle creature movement
+
 F2 key: toggle light auto-movement
 
 
 In free view:
+
 F3 key: spawn in a new egg in a random position
+
 j/J key: increase/decrease spawn size of crawlers
+
 k key: kill all living crawlers
 
+
 In inspect view:
+
 \+ or - : increase or decrease light distance
+
 ] or [ : increase or decrease light height
+
 \> or < : move light sideways in either direction
 
+
 j key: activate spawn animation
+
 k key: activate burn animation
 
 
