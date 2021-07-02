@@ -247,8 +247,6 @@ class Skybox:
         
         _gl.glBegin(_gl.GL_QUADS)
         
-        # Had to ham-fist this because I didn't want to think about
-        # texture orientations.
         if name in ['right']:
             _gl.glTexCoord2f(0,0)
             _gl.glVertex3f(*verts[0])

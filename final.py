@@ -16,7 +16,6 @@ from SimpleObjects import drawContainer, drawContainerWalls
 from BaseSpecies import Crawler
 from world_objects import Terrain, Skybox, Lamp, Table
 
-from shaders import shader_strings
 from shader_functions import activateShader
 
 
@@ -48,17 +47,14 @@ creature_locs = {}
 creature_boxes = {}
 total_count=0
 
-
+# Testing variables.
 tvars={'f':0,'g':0,'h':1}
 
 # Camera variable dictionaries.
 
 cam_p = init_cam_pos.copy()
 cam_vars = {'th_h': -25, 'phi_v': -15}
-'''
-cam_vars = {'th_h':0,
-            'phi_v':-30}
-'''
+
 
 # Window dimensions (width, height).
 w, h = 1000, 1000
@@ -171,16 +167,6 @@ def display():
         print ('here',e)
     
     
-    '''
-    try:
-        #pipe = Pipe3([0,1,0],res=15,r=0.1,phi=tvars['f'],alpha=tvars['g'])
-        #pipe.draw()
-        obs['pipe'].draw()
-    except Exception as e:
-        print ('draw',e)
-    
-    
-    '''
     _gl.glUseProgram(0)
     
     
@@ -415,7 +401,6 @@ def camSpecial(key, x, y):
         
     # F3 spawns in a new crawler.
     elif key == _glut.GLUT_KEY_F3:
-        
         if free_sim_mode:
             try:
                 attempt = spawnCreature()
@@ -423,15 +408,8 @@ def camSpecial(key, x, y):
                     print ('There may not be enough room for the requested number of creatures.')
                     print ('Stopping creature generation.')
             except Exception as e:
-                print ('spawn',e)
-        else:
-            try:
-                if len(list(creatures.keys()))<1:
-                    attempt = spawnCreature(location=[0,0,0],facing_th=0,stasis=True)
-                if not attempt:
-                    print ('Creature creation failed due to memory exception.')
-            except Exception as e:
-                print ('spawn2',e)
+                print ('key spawn',e)
+            
     
     
     _glut.glutPostRedisplay()
@@ -500,6 +478,15 @@ def camKey(ch, x, y):
             cam_vars = {'th_h':0,'phi_v':-30}
             camUpdate()
             killAll()
+            
+            # Spawn in a crawler in stasis.
+            try:
+                attempt = spawnCreature(location=[0,0,0],facing_th=0,stasis=True)
+                if not attempt:
+                    print ('Creature creation failed due to memory exception.')
+            except Exception as e:
+                print ('key spawn',e)
+                
         else:
             free_sim_mode = True
             killAll()
@@ -879,19 +866,24 @@ def initObjects():
             c = str(check)
             print (f'Initialization exception. Attempt #{c}/10.')
     
+
+
+
+
+def readShaderString(filename):
+    shader_path = './shaders/'
     
-    for i in range(5):
-        attempt = spawnCreature()
-        if not attempt:
-            print ('Creature creation failed due to memory exception.')
+    with open(shader_path+filename,'r') as f:
+        data = f.read()
     
+    return data
 
 
 def initShaders():
     global shader_strings
-    shaders['burn'] = initShaderProg(shader_strings['burnv'], shader_strings['burnf'])
-    shaders['spawn'] = initShaderProg(shader_strings['spawnv'], shader_strings['spawnf'])
-    shaders['base'] = initShaderProg(shader_strings['basev'], shader_strings['basef'])
+    shaders['burn'] = initShaderProg(readShaderString('burn.vert'), readShaderString('burn.frag'))
+    shaders['spawn'] = initShaderProg(readShaderString('spawn.vert'), readShaderString('spawn.frag'))
+    shaders['base'] = initShaderProg(readShaderString('base.vert'), readShaderString('base.frag'))
 
 
 def main():
@@ -931,12 +923,12 @@ def main():
     initShaders()
     
     
-    skybox_textures = {'front':importTexture('posz.bmp',1, 1),
-                       'right':importTexture('posx.bmp',1, 1),
-                       'top':importTexture('posy.bmp',1, 1),
-                       'left':importTexture('negx.bmp',1, 1),
-                       'bottom':importTexture('negy.bmp',1, 1),
-                       'back':importTexture('negz.bmp',1, 1)}
+    skybox_textures = {'front':importTexture('/skybox/posz.bmp',1, 1),
+                       'right':importTexture('/skybox/posx.bmp',1, 1),
+                       'top':importTexture('/skybox/posy.bmp',1, 1),
+                       'left':importTexture('/skybox/negx.bmp',1, 1),
+                       'bottom':importTexture('/skybox/negy.bmp',1, 1),
+                       'back':importTexture('/skybox/negz.bmp',1, 1)}
     
     table_texture = importTexture('wood.bmp',1, 1)
     

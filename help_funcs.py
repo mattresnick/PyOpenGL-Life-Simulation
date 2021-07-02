@@ -42,12 +42,9 @@ def printText(on, n_alive, n_total, light, freeview, spawnsize):
 
 
 
-def importTexture(filepath, f, g):
-    # I adapted this texture loading function from the post and responses in:
-    # https://stackoverflow.com/questions/43033625/why-my-texture-is-not-showing-pyopengl
-    
-    # import and convert image data to array.
-    im = Image.open(filepath)
+def importTexture(filename, f, g):
+    tex_path = './textures/'
+    im = Image.open(tex_path+filename)
     im_arr = np.array(list(im.getdata()))
     
     # Generate texture ID and bind.

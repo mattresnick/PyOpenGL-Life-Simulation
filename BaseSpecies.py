@@ -15,10 +15,6 @@ from shader_functions import activateShader
 
 
 
-
-
-
-
 class Crawler:
     '''
     Crawlers are striped creatures with round bodies and several legs.
@@ -622,6 +618,18 @@ class Mouth(BodyPart):
         super().__init__(colors)
     
     
+    def genNormals(self,triangles):
+        normals = []
+        for triangle in triangles:
+            v1 = triangle[0]
+            v2 = triangle[1]
+            v3 = triangle[2]
+            
+            face_normal = -1*np.cross(v2-v1,v3-v1)
+            for j in range(3):
+                normals.append(face_normal)
+            
+        return np.array(normals)
     
     def genTriangles(self):
         triangles = []
@@ -644,7 +652,7 @@ class Mouth(BodyPart):
         
         triangles.append([vlist[0],vlist[2],vlist[3]])
         triangles.append([vlist[0],vlist[1],vlist[2]])
-        triangles.append([vlist[0],vlist[5],vlist[10]])
+        triangles.append([vlist[5],vlist[10],vlist[0]])
         triangles.append([vlist[0],vlist[4],vlist[5]])
         triangles.append([vlist[4],vlist[10],vlist[5]])
         triangles.append([vlist[3],vlist[2],vlist[6]])
@@ -652,15 +660,15 @@ class Mouth(BodyPart):
         triangles.append([vlist[2],vlist[7],vlist[8]])
         triangles.append([vlist[6],vlist[8],vlist[9]])
         triangles.append([vlist[9],vlist[8],vlist[10]])
-        triangles.append([vlist[8],vlist[7],vlist[10]])
+        triangles.append([vlist[7],vlist[10],vlist[8]])
         triangles.append([vlist[3],vlist[6],vlist[11]])
         triangles.append([vlist[6],vlist[9],vlist[11]])
         
         # Bottom.
         lower = lambda l_: [l_[0], -3, l_[2]]
         
-        wall1 = lambda l,r: triangles.append([vlist[l],lower(vlist[l]),vlist[r]])
-        wall2 = lambda l,r: triangles.append([lower(vlist[l]),lower(vlist[r]),vlist[r]])
+        wall1 = lambda l,r: triangles.append([vlist[l], vlist[r], lower(vlist[l])])
+        wall2 = lambda l,r: triangles.append([vlist[r],lower(vlist[r]),lower(vlist[l])])
         
         #triangles.append([vlist[0],lower(vlist[0]),vlist[4]])
         #triangles.append([lower(vlist[0]),lower(vlist[4]),vlist[0]])
@@ -698,7 +706,18 @@ class Tail(BodyPart):
     def __init__(self,colors=[1,1,1]):
         super().__init__(colors)
     
-    
+    def genNormals(self,triangles):
+        normals = []
+        for triangle in triangles:
+            v1 = triangle[0]
+            v2 = triangle[1]
+            v3 = triangle[2]
+            
+            face_normal = -1*np.cross(v2-v1,v3-v1)
+            for j in range(3):
+                normals.append(face_normal)
+            
+        return np.array(normals)
     
     def genTriangles(self):
         triangles = []
@@ -734,13 +753,14 @@ class Tail(BodyPart):
             triangles.append([vlist[i+1],vlist[i+4],vlist[i+5]])
             triangles.append([vlist[i+1],vlist[i+5],vlist[i+2]])
             
+            
             # Lower quad 1.
-            triangles.append([vlist[i],vlist[i+3],lower(vlist[i+4])])
-            triangles.append([vlist[i],lower(vlist[i+4]),lower(vlist[i+1])])
+            triangles.append([lower(vlist[i+4]), vlist[i+3], vlist[i]]) 
+            triangles.append([lower(vlist[i+1]), lower(vlist[i+4]), vlist[i]])
             
             # Lower quad 2.
-            triangles.append([lower(vlist[i+1]),lower(vlist[i+4]),vlist[i+5]])
-            triangles.append([lower(vlist[i+1]),vlist[i+5],vlist[i+2]])
+            triangles.append([vlist[i+5], lower(vlist[i+4]), lower(vlist[i+1])])
+            triangles.append([vlist[i+2], vlist[i+5], lower(vlist[i+1])])
             
         
         
@@ -750,9 +770,8 @@ class Tail(BodyPart):
         
         
         # Lower tail tip.
-        # Upper tail tip.
-        triangles.append([vlist[12],vlist[15],lower(vlist[13])])
-        triangles.append([lower(vlist[13]),vlist[15],vlist[14]])
+        triangles.append([lower(vlist[13]), vlist[15], vlist[12]])
+        triangles.append([vlist[14], vlist[15], lower(vlist[13])])
         
         
         return np.array(triangles)
