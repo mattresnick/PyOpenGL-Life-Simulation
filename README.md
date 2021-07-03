@@ -1,7 +1,7 @@
 
 ## Overview
 
-This is a simple "life" simulation done via PyOpenGL to experiment with and implement 3D models, lighting, textures, and basic shaders.
+This is a simple "life" simulation done via PyOpenGL to experiment with and implement 3D models, lighting, textures, and basic shaders. This project needed to be completed from scratch in ~9 days so there may be some remaining issues with efficiency or collision bugs.
 
 There are two views for this project, and while both allow for first-person control of the camera, they focus on different things and have differing controls. The free view is how it starts, and allows for full view and control of the simulation (F3 to spawn creatures), and is also best for exploring the environment. The inspect view focuses on a single creature and has a controllable light.
 
